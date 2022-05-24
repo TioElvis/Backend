@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from 'src/users/schema/users.schema';
 import { AcceptRequestFriendDto } from './dto/acceptRequestFriendDto.dto';
+import { RejectRequestFriendDto } from './dto/rejectRequestFriendDto.dto';
 import { SendRequestFriendDto } from './dto/sendRequestFriendDto.dto';
 
 @Injectable()
 export class FriendsService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
+  // Route Send Request Friend
   async sendRequest(id: string, sendRequestFriendDto: SendRequestFriendDto) {
     const { idUserToAdd } = sendRequestFriendDto;
 
@@ -61,6 +63,7 @@ export class FriendsService {
       throw new HttpException('You have already sent a friend request', 401);
     }
 
+    // Updating
     await userSendingFriendRequest?.updateOne({
       $push: {
         pendingFriendRequests: userReceivingFriendRequest?._id,
@@ -76,12 +79,14 @@ export class FriendsService {
     return 'The request has been sent successfully';
   }
 
+  // Route Accept Request Friend
   async acceptRequest(
     id: string,
     acceptRequestFriendDto: AcceptRequestFriendDto,
   ) {
     const { idUserToAccept } = acceptRequestFriendDto;
 
+    // Extracting information from users
     const userAccepting = await this.userModel
       .findById(id, {
         _id: true,
@@ -106,6 +111,7 @@ export class FriendsService {
     const { friends: friendsUserToAccept } = userToAccept;
     const { friends: friendsUserAccepting } = userAccepting;
 
+    // If they are already friends
     const isAlreadyAdded =
       friendsUserToAccept.includes(userAccepting?._id) &&
       friendsUserAccepting.includes(userToAccept?._id);
@@ -114,6 +120,7 @@ export class FriendsService {
       throw new HttpException('This user is already your friend', 401);
     }
 
+    // Updating
     await userAccepting?.updateOne({
       $pull: {
         friendsRequests: userToAccept?._id,
@@ -125,7 +132,7 @@ export class FriendsService {
 
     await userToAccept?.updateOne({
       $pull: {
-        friendsRequests: userAccepting?._id,
+        pendingFriendRequests: userAccepting?._id,
       },
       $push: {
         friends: userAccepting?._id,
@@ -135,7 +142,74 @@ export class FriendsService {
     return `You and ${userToAccept?.nickName} are friends`;
   }
 
-  rejectRequest(id: string) {
-    return `This action removes a #${id} friend`;
+  // Route Reject Request Friend
+  async rejectRequest(
+    id: string,
+    rejectRequestFriendDto: RejectRequestFriendDto,
+  ) {
+    const { idUserToRecject } = rejectRequestFriendDto;
+
+    // Extracting information from users
+    const userRejecting = await this.userModel
+      .findById(id, {
+        _id: true,
+        friendsRequests: true,
+        friends: true,
+      })
+      .catch(() => {
+        throw new HttpException('User not found', 404);
+      });
+
+    const userToReject = await this.userModel
+      .findById(idUserToRecject, {
+        _id: true,
+        pendingFriendRequests: true,
+        friends: true,
+        nickName: true,
+      })
+      .catch(() => {
+        throw new HttpException('User not found', 404);
+      });
+
+    const { friends: friendsUserReject, pendingFriendRequests } = userToReject;
+    const { friends: friendsUserRejecting, friendsRequests } = userRejecting;
+
+    // If they are already friends
+    const isFriend =
+      friendsUserReject.includes(userRejecting?._id) &&
+      friendsUserRejecting.includes(userToReject?._id);
+
+    if (isFriend) {
+      throw new HttpException(
+        'You cant reject a friend but you can remove them from your friends list',
+        401,
+      );
+    }
+
+    const isAlreadyReject =
+      pendingFriendRequests.includes(userRejecting?._id) &&
+      friendsRequests.includes(userToReject?._id);
+
+    if (!isAlreadyReject) {
+      throw new HttpException(
+        'This user has already been rejected or never sent you a request',
+        401,
+      );
+    }
+
+    // Updating
+    await userRejecting?.updateOne({
+      $pull: {
+        friendsRequests: userToReject?._id,
+      },
+    });
+
+    await userToReject?.updateOne({
+      $pull: {
+        pendingFriendRequests: userRejecting?._id,
+      },
+    });
+
+    return `you removed ${userToReject.nickName} from your friends list `;
   }
 }
