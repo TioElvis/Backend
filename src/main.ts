@@ -14,6 +14,7 @@ async function bootstrap() {
     .addTag('auth')
     .addTag('posts')
     .addTag('users')
+    .addTag('friends')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('infinity-api', app, document);

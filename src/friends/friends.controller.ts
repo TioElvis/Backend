@@ -1,9 +1,15 @@
-import { Controller, Body, Param, Delete, Patch } from '@nestjs/common';
+import { Controller, Body, Param, Patch, UseGuards } from '@nestjs/common';
 import { FriendsService } from './friends.service';
 import { SendRequestFriendDto } from './dto/sendRequestFriendDto.dto';
 import { AcceptRequestFriendDto } from './dto/acceptRequestFriendDto.dto';
 import { RejectRequestFriendDto } from './dto/rejectRequestFriendDto.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtGuard } from 'src/auth/jwt-auth.guard';
+import { DeleteFriendDto } from './dto/deleteFriendDto.dto';
 
+@ApiBearerAuth()
+@ApiTags('friends')
+@UseGuards(JwtGuard)
 @Controller('friends')
 export class FriendsController {
   constructor(private readonly friendsService: FriendsService) {}
@@ -30,5 +36,13 @@ export class FriendsController {
     @Body() rejectRequestFriendDto: RejectRequestFriendDto,
   ) {
     return this.friendsService.rejectRequest(id, rejectRequestFriendDto);
+  }
+
+  @Patch('/delete/:id')
+  deleteFriend(
+    @Param('id') id: string,
+    @Body() deleteFriendDto: DeleteFriendDto,
+  ) {
+    return this.friendsService.deleteFriend(id, deleteFriendDto);
   }
 }
