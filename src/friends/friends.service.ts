@@ -140,11 +140,7 @@ export class FriendsService {
       friends: friendsUserToAccept,
       pendingFriendRequests: pFRUserToAccept,
     } = userToAccept;
-    const {
-      friends: friendsUserAccepting,
-      pendingFriendRequests: pFRUserAccepting,
-      friendsRequests,
-    } = userAccepting;
+    const { friends: friendsUserAccepting, friendsRequests } = userAccepting;
 
     // If the user does not have any request from the user to accept
     const haveFriendRequest =
@@ -154,16 +150,6 @@ export class FriendsService {
     if (!haveFriendRequest) {
       throw new HttpException(
         'This user has not sent you a friend request',
-        401,
-      );
-    }
-
-    // If the user who sent the request wants to accept it through the user who sent the request
-    const YCAYATUTYHSTFR = pFRUserAccepting.includes(userToAccept._id);
-
-    if (YCAYATUTYHSTFR) {
-      throw new HttpException(
-        'You cannot accept yourself accepting the user that you have sent the friend request',
         401,
       );
     }
