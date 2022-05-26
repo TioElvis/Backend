@@ -1,19 +1,20 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { User, UserDocument } from 'src/users/schema/users.schema';
-import { AcceptRequestFriendDto } from './dto/acceptRequestFriendDto.dto';
-import { DeleteFriendDto } from './dto/deleteFriendDto.dto';
-import { RejectRequestFriendDto } from './dto/rejectRequestFriendDto.dto';
-import { SendRequestFriendDto } from './dto/sendRequestFriendDto.dto';
+import { AcceptFRDto } from './dto/acceptFR.dto';
+import { DeleteFDto } from './dto/deleteF.dto';
+import { RejectFRDto } from './dto/rejectFR.dto';
+import { SendFRDto } from './dto/sendFR.dto';
+import { Model } from 'mongoose';
+import { CancelFRDto } from './dto/cancelFR.dto';
 
 @Injectable()
 export class FriendsService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   // Route Send Request Friend
-  async sendRequest(id: string, sendRequestFriendDto: SendRequestFriendDto) {
-    const { idUserToAdd } = sendRequestFriendDto;
+  async sendRequest(id: string, sendFriendRequestDto: SendFRDto) {
+    const { idUserToAdd } = sendFriendRequestDto;
 
     // If the user is sending a friend request to himself
     if (id === idUserToAdd) {
@@ -24,71 +25,87 @@ export class FriendsService {
     }
 
     // Extracting information from users
-    const userSendingFriendRequest = await this.userModel
+    const userSending = await this.userModel
       .findById(id, {
         _id: true,
         friends: true,
+        friendsRequests: true,
         pendingFriendRequests: true,
       })
       .catch(() => {
         throw new HttpException('User not found', 404);
       });
 
-    const userReceivingFriendRequest = await this.userModel
+    const userReceiving = await this.userModel
       .findById(idUserToAdd, {
         _id: true,
         friends: true,
         friendsRequests: true,
+        pendingFriendRequests: true,
         nickName: true,
       })
       .catch(() => {
         throw new HttpException('User not found', 404);
       });
 
-    const { friends: friendsUserSending, pendingFriendRequests } =
-      userSendingFriendRequest;
-    const { friends: friendsUserReceiving, friendsRequests } =
-      userReceivingFriendRequest;
+    const {
+      friends: friendsUserSending,
+      pendingFriendRequests: pFRUserSending,
+      friendsRequests: fRUserSending,
+    } = userSending;
+    const {
+      friends: friendsUserReceiving,
+      friendsRequests: fRUserReceiving,
+      pendingFriendRequests: pFRUserReceiving,
+    } = userReceiving;
 
     // If they are already friends
     const isAlreadyAdded =
-      friendsUserReceiving.includes(userSendingFriendRequest?._id) &&
-      friendsUserSending.includes(userReceivingFriendRequest?._id);
+      friendsUserReceiving.includes(userSending?._id) &&
+      friendsUserSending.includes(userReceiving?._id);
 
     if (isAlreadyAdded) {
       throw new HttpException('This user is already your friend', 401);
     }
 
-    // If you have already submitted an application
-    const requestAlreadySent =
-      friendsRequests.includes(userSendingFriendRequest?._id) &&
-      pendingFriendRequests.includes(userReceivingFriendRequest?._id);
+    // If you already sent a friend request
+    const friendRequestAlreadySent =
+      fRUserReceiving.includes(userSending?._id) &&
+      pFRUserSending.includes(userReceiving?._id);
 
-    if (requestAlreadySent) {
+    if (friendRequestAlreadySent) {
       throw new HttpException('You have already sent a friend request', 401);
     }
 
+    // if the user who is receiving the friend request, already sent you a friend request
+    const iHaveAlreadyFriendRequest =
+      fRUserSending.includes(userReceiving?._id) &&
+      pFRUserReceiving.includes(userSending?._id);
+
+    if (iHaveAlreadyFriendRequest) {
+      throw new HttpException(
+        'This user is already sent you a friend request, you can accept their friend request',
+        401,
+      );
+    }
     // Updating
-    await userSendingFriendRequest?.updateOne({
+    await userSending?.updateOne({
       $push: {
-        pendingFriendRequests: userReceivingFriendRequest?._id,
+        pendingFriendRequests: userReceiving?._id,
       },
     });
 
-    await userReceivingFriendRequest?.updateOne({
+    await userReceiving?.updateOne({
       $push: {
-        friendsRequests: userSendingFriendRequest?._id,
+        friendsRequests: userSending?._id,
       },
     });
 
-    return `You have sent a friend request to ${userReceivingFriendRequest.nickName}`;
+    return `You have sent a friend request to ${userReceiving.nickName}`;
   }
 
   // Route Accept Request Friend
-  async acceptRequest(
-    id: string,
-    acceptRequestFriendDto: AcceptRequestFriendDto,
-  ) {
+  async acceptRequest(id: string, acceptRequestFriendDto: AcceptFRDto) {
     const { idUserToAccept } = acceptRequestFriendDto;
 
     // If the user wants to accept the same
@@ -121,17 +138,17 @@ export class FriendsService {
 
     const {
       friends: friendsUserToAccept,
-      pendingFriendRequests: pendingFriendRequestsUserToAccept,
+      pendingFriendRequests: pFRUserToAccept,
     } = userToAccept;
     const {
       friends: friendsUserAccepting,
-      pendingFriendRequests: pendingFriendRequestsUserAccepting,
+      pendingFriendRequests: pFRUserAccepting,
       friendsRequests,
     } = userAccepting;
 
     // If the user does not have any request from the user to accept
     const haveFriendRequest =
-      pendingFriendRequestsUserToAccept.includes(userAccepting?._id) &&
+      pFRUserToAccept.includes(userAccepting?._id) &&
       friendsRequests.includes(userToAccept?._id);
 
     if (!haveFriendRequest) {
@@ -142,12 +159,11 @@ export class FriendsService {
     }
 
     // If the user who sent the request wants to accept it through the user who sent the request
-    const YouCannotAcceptYourselfAcceptingTheUserThatYouHaveSentTheRequest =
-      pendingFriendRequestsUserAccepting.includes(userToAccept._id);
+    const YCAYATUTYHSTFR = pFRUserAccepting.includes(userToAccept._id);
 
-    if (YouCannotAcceptYourselfAcceptingTheUserThatYouHaveSentTheRequest) {
+    if (YCAYATUTYHSTFR) {
       throw new HttpException(
-        'You cannot accept yourself accepting the user that you have sent the request',
+        'You cannot accept yourself accepting the user that you have sent the friend request',
         401,
       );
     }
@@ -184,10 +200,7 @@ export class FriendsService {
   }
 
   // Route Reject Request Friend
-  async rejectRequest(
-    id: string,
-    rejectRequestFriendDto: RejectRequestFriendDto,
-  ) {
+  async rejectRequest(id: string, rejectRequestFriendDto: RejectFRDto) {
     const { idUserToRecject } = rejectRequestFriendDto;
 
     // If the user is sending a friend request to himself
@@ -260,7 +273,7 @@ export class FriendsService {
   }
 
   // Route Delete Friend
-  async deleteFriend(id: string, deleteFriendDto: DeleteFriendDto) {
+  async deleteFriend(id: string, deleteFriendDto: DeleteFDto) {
     const { idFriendToDelete } = deleteFriendDto;
 
     // If the user is sending a friend request to himself
@@ -297,21 +310,22 @@ export class FriendsService {
 
     const {
       friends: friendsUserDeleting,
-      pendingFriendRequests: pendingFriendRequestsUserDeleting,
-      friendsRequests: friendsRequestUserDeleting,
+      pendingFriendRequests: pFRUserDeleting,
+      friendsRequests: fRUserDeleting,
     } = userDeleting;
+
     const {
       friends: friendsUserToDelete,
-      pendingFriendRequests: pendingFriendRequestsUserToDelete,
-      friendsRequests: friendsRequestUserToDelete,
+      pendingFriendRequests: pFRUserToDelete,
+      friendsRequests: fRUserToDelete,
     } = userToDelete;
 
     // If you have sent a friend request to the user to be deleted
-    const youSendARequestFriendFromThisUser =
-      pendingFriendRequestsUserDeleting.includes(userToDelete?._id) &&
-      friendsRequestUserToDelete.includes(userDeleting?._id);
+    const youSendRFToThisUser =
+      pFRUserDeleting.includes(userToDelete?._id) &&
+      fRUserToDelete.includes(userDeleting?._id);
 
-    if (youSendARequestFriendFromThisUser) {
+    if (youSendRFToThisUser) {
       throw new HttpException(
         'You have sent a friend request to this user so you cannot remove him from your friends list but you can cancel the friend request you have sent',
         401,
@@ -319,11 +333,11 @@ export class FriendsService {
     }
 
     // If the user to delete I send you a friend request
-    const youHaveRequestFriendFromThisUser =
-      friendsRequestUserDeleting.includes(userToDelete?._id) &&
-      pendingFriendRequestsUserToDelete.includes(userDeleting?._id);
+    const youHaveRFToThisUser =
+      fRUserDeleting.includes(userToDelete?._id) &&
+      pFRUserToDelete.includes(userDeleting?._id);
 
-    if (youHaveRequestFriendFromThisUser) {
+    if (youHaveRFToThisUser) {
       throw new HttpException(
         'This user has sent you a friend request, so you cannot remove him from your friends list, but you can reject the friend request he sent you',
         401,
@@ -355,5 +369,9 @@ export class FriendsService {
     });
 
     return `You have removed ${userToDelete?.nickName} from your friends list`;
+  }
+
+  cancelRequest(id: string, cancelFRdto: CancelFRDto) {
+    return 'a';
   }
 }

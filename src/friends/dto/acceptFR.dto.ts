@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class RejectRequestFriendDto {
+export class AcceptFRDto {
   @IsNotEmpty()
-  idUserToRecject: string;
+  idUserToAccept: string;
 }

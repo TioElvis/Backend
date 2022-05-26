@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class SendRequestFriendDto {
+export class DeleteFDto {
   @IsNotEmpty()
-  idUserToAdd: string;
+  idFriendToDelete: string;
 }
