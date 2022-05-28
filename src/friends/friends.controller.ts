@@ -32,7 +32,7 @@ export class FriendsController {
     return this.friendsService.deleteFriend(id, deleteFriendDto);
   }
 
-  @Patch('cancel/:id')
+  @Patch('/cancel/:id')
   cancelRequest(@Param('id') id: string, @Body() cancelFRdto: CancelFRDto) {
     return this.friendsService.cancelRequest(id, cancelFRdto);
   }

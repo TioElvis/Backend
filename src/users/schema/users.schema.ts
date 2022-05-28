@@ -25,6 +25,9 @@ export class User {
   @Prop({ ref: 'posts', default: [] })
   posts: Types.ObjectId[];
 
+  @Prop({ ref: 'posts', default: [] })
+  postsThatILike: Types.ObjectId[];
+
   @Prop({ ref: 'users', default: [] })
   friends: Types.ObjectId[];
 

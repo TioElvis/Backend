@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { Post, PostSchema } from './schema/posts.schema';
+import { User, UserSchema } from 'src/users/schema/users.schema';
 
 @Module({
   imports: [
@@ -10,6 +11,10 @@ import { Post, PostSchema } from './schema/posts.schema';
       {
         name: Post.name,
         schema: PostSchema,
+      },
+      {
+        name: User.name,
+        schema: UserSchema,
       },
     ]),
   ],

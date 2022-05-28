@@ -364,7 +364,6 @@ export class FriendsService {
     const { idUserToCancel } = cancelFRdto;
 
     // If the user is canceling himself
-
     if (id === idUserToCancel) {
       throw new HttpException('You cant cancel a friend request yourself', 400);
     }
@@ -434,6 +433,6 @@ export class FriendsService {
       },
     });
 
-    return `You have canceled the request you sent to ${userToCancel?.nickName}`;
+    return `You have canceled the friend request you sent to ${userToCancel?.nickName}`;
   }
 }
