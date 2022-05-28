@@ -1,16 +1,13 @@
-import { Controller, Body, Param, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Body, Param, Patch } from '@nestjs/common';
 import { FriendsService } from './friends.service';
 import { SendFRDto } from './dto/sendFR.dto';
 import { AcceptFRDto } from './dto/acceptFR.dto';
 import { RejectFRDto } from './dto/rejectFR.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtGuard } from 'src/auth/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 import { DeleteFDto } from './dto/deleteF.dto';
 import { CancelFRDto } from './dto/cancelFR.dto';
 
-@ApiBearerAuth()
 @ApiTags('friends')
-@UseGuards(JwtGuard)
 @Controller('friends')
 export class FriendsController {
   constructor(private readonly friendsService: FriendsService) {}

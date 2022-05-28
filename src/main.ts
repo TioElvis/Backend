@@ -22,7 +22,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
 
-  await app.listen(9000);
+  await app.listen(9000, '0.0.0.0');
 }
 
 bootstrap();
