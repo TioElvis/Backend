@@ -1,11 +1,11 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   UseInterceptors,
   UploadedFile,
   Param,
+  Delete,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePDto } from './dto/createP.dto';
@@ -14,6 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { parse } from 'path';
+import { DeletePDto } from './dto/deleteP.dto';
 
 @ApiTags('posts')
 @Controller('posts')
@@ -41,8 +42,8 @@ export class PostsController {
     return this.postsService.createP(createPDto, file, id);
   }
 
-  @Get()
-  findAllPosts() {
-    return this.postsService.findAllPosts();
+  @Delete('/delete/:id')
+  findAllPosts(@Param('id') id: string, @Body() deletePDto: DeletePDto) {
+    return this.postsService.deleteP(id, deletePDto);
   }
 }

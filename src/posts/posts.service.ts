@@ -1,11 +1,12 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreatePDto } from './dto/createP.dto';
-import { Post, PostDocument } from './schema/posts.schema';
 import { Model } from 'mongoose';
-import { uploadImage } from './libs/cloudinary';
 import { remove } from 'fs-extra';
+import { Post, PostDocument } from './schema/posts.schema';
 import { User, UserDocument } from 'src/users/schema/users.schema';
+import { deleteImage, uploadImage } from './libs/cloudinary';
+import { DeletePDto } from './dto/deleteP.dto';
 
 @Injectable()
 export class PostsService {
@@ -72,8 +73,58 @@ export class PostsService {
     return `${userCreatingPost?.nickName} you have created a post successfully`;
   }
 
-  async findAllPosts() {
-    const postFindAll = await this.postModel.find();
-    return postFindAll;
+  async deleteP(id: string, deletePDto: DeletePDto) {
+    const { idPostToDelete } = deletePDto;
+
+    // Extracting information
+    const userDeleting = await this.userModel
+      .findById(id, {
+        _id: true,
+        posts: true,
+        nickName: true,
+      })
+      .catch(() => {
+        throw new HttpException('User to delete post not found', 404);
+      });
+
+    const postToDelete = await this.postModel
+      .findById(idPostToDelete, {
+        _id: true,
+        image: true,
+      })
+      .catch(() => {
+        throw new HttpException('post to delete not found', 404);
+      });
+
+    if (!userDeleting) {
+      throw new HttpException('User not found, thats why this error', 404);
+    }
+
+    const { posts } = userDeleting;
+
+    const isMyPost = posts.includes(postToDelete?._id);
+
+    if (!isMyPost) {
+      throw new HttpException(
+        'This post was not created by you, therefore you cannot delete it',
+        400,
+      );
+    }
+
+    const { image } = postToDelete;
+
+    if (image) {
+      await deleteImage(image.public_id);
+    }
+
+    await postToDelete.delete();
+
+    await userDeleting?.updateOne({
+      $pull: {
+        posts: postToDelete?._id,
+      },
+    });
+
+    return `${userDeleting.nickName} you have successfully deleted a post`;
   }
 }
