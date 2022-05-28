@@ -2,8 +2,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Module } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
-import { Post, PostSchema } from './schema/posts.schema';
-import { User, UserSchema } from 'src/users/schema/users.schema';
+import { Post, PostSchema } from 'src/routes/posts/schema/posts.schema';
+import { User, UserSchema } from 'src/routes/users/schema/users.schema';
 
 @Module({
   imports: [

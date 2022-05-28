@@ -1,21 +1,21 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PostsModule } from './posts/posts.module';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { FriendsModule } from './friends/friends.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './routes/auth/auth.module';
+import { FriendsModule } from './routes/friends/friends.module';
+import { PostsModule } from './routes/posts/posts.module';
+import { UsersModule } from './routes/users/users.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGO_URI),
-    PostsModule,
-    AuthModule,
     UsersModule,
+    AuthModule,
     FriendsModule,
+    PostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

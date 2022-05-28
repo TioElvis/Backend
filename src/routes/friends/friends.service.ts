@@ -1,12 +1,12 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from 'src/users/schema/users.schema';
 import { AcceptFRDto } from './dto/acceptFR.dto';
 import { DeleteFDto } from './dto/deleteF.dto';
 import { RejectFRDto } from './dto/rejectFR.dto';
 import { SendFRDto } from './dto/sendFR.dto';
 import { Model } from 'mongoose';
 import { CancelFRDto } from './dto/cancelFR.dto';
+import { User, UserDocument } from 'src/routes/users/schema/users.schema';
 
 @Injectable()
 export class FriendsService {
@@ -243,7 +243,7 @@ export class FriendsService {
     if (!isAlreadyReject) {
       throw new HttpException(
         'This user has already been rejected or never sent you a request',
-        401,
+        400,
       );
     }
 

@@ -3,10 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { CreatePDto } from './dto/createP.dto';
 import { Model } from 'mongoose';
 import { remove } from 'fs-extra';
-import { Post, PostDocument } from './schema/posts.schema';
-import { User, UserDocument } from 'src/users/schema/users.schema';
-import { deleteImage, uploadImage } from './libs/cloudinary';
 import { DeletePDto } from './dto/deleteP.dto';
+import { Post, PostDocument } from 'src/routes/posts/schema/posts.schema';
+import { User, UserDocument } from 'src/routes/users/schema/users.schema';
+import { deleteImage, uploadImage } from 'src/libs/cloudinary';
 
 @Injectable()
 export class PostsService {
@@ -73,6 +73,7 @@ export class PostsService {
     return `${userCreatingPost?.nickName} you have created a post successfully`;
   }
 
+  // Route Delete Post
   async deleteP(id: string, deletePDto: DeletePDto) {
     const { idPostToDelete } = deletePDto;
 
@@ -96,10 +97,12 @@ export class PostsService {
         throw new HttpException('post to delete not found', 404);
       });
 
+    // if there is no user deleted a post
     if (!userDeleting) {
       throw new HttpException('User not found, thats why this error', 404);
     }
 
+    // if not my post
     const { posts } = userDeleting;
 
     const isMyPost = posts.includes(postToDelete?._id);
@@ -111,12 +114,14 @@ export class PostsService {
       );
     }
 
+    // if there is an image
     const { image } = postToDelete;
 
     if (image) {
       await deleteImage(image.public_id);
     }
 
+    // Updating
     await postToDelete.delete();
 
     await userDeleting?.updateOne({
