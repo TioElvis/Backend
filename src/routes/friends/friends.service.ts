@@ -6,11 +6,13 @@ import { RejectFRDto } from './dto/rejectFR.dto';
 import { SendFRDto } from './dto/sendFR.dto';
 import { Model } from 'mongoose';
 import { CancelFRDto } from './dto/cancelFR.dto';
-import { User, UserDocument } from 'src/routes/users/schema/users.schema';
+import { Users, UserDocument } from 'src/routes/users/schema/users.schema';
 
 @Injectable()
 export class FriendsService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(Users.name) private userModel: Model<UserDocument>,
+  ) {}
 
   // Route Send Friend Request
   async sendRequest(id: string, sendFriendRequestDto: SendFRDto) {
@@ -50,6 +52,11 @@ export class FriendsService {
           404,
         );
       });
+
+    // if the id has the same characters as the normal id per does not exist
+    if (!userSending || !userReceiving) {
+      throw new HttpException('Users not found', 400);
+    }
 
     const {
       friends: friendsUserSending,
@@ -124,6 +131,8 @@ export class FriendsService {
         friendsRequests: true,
         friends: true,
         pendingFriendRequests: true,
+        posts: true,
+        postsFriends: true,
       })
       .catch(() => {
         throw new HttpException('User accepting friend request not found', 404);
@@ -135,10 +144,17 @@ export class FriendsService {
         pendingFriendRequests: true,
         friends: true,
         nickName: true,
+        posts: true,
+        postsFriends: true,
       })
       .catch(() => {
         throw new HttpException('User to accept friend request not found', 404);
       });
+
+    // if the id has the same characters as the normal id per does not exist
+    if (!userAccepting || !userToAccept) {
+      throw new HttpException('Users not found', 400);
+    }
 
     const {
       friends: friendsUserToAccept,
@@ -174,6 +190,7 @@ export class FriendsService {
       },
       $push: {
         friends: userToAccept?._id,
+        postsFriends: userToAccept?.posts,
       },
     });
 
@@ -183,6 +200,7 @@ export class FriendsService {
       },
       $push: {
         friends: userAccepting?._id,
+        postsFriends: userAccepting?.posts,
       },
     });
 
@@ -219,6 +237,11 @@ export class FriendsService {
       .catch(() => {
         throw new HttpException('User not found', 404);
       });
+
+    // if the id has the same characters as the normal id per does not exist
+    if (!userRejecting || !userRejecting) {
+      throw new HttpException('Users not found', 400);
+    }
 
     const { friends: friendsUserReject, pendingFriendRequests } = userToReject;
     const { friends: friendsUserRejecting, friendsRequests } = userRejecting;
@@ -298,6 +321,11 @@ export class FriendsService {
       .catch(() => {
         throw new HttpException('User to delete not found', 404);
       });
+
+    // if the id has the same characters as the normal id per does not exist
+    if (!userDeleting || !userToDelete) {
+      throw new HttpException('Users not found', 400);
+    }
 
     const {
       friends: friendsUserDeleting,
@@ -379,7 +407,7 @@ export class FriendsService {
         throw new HttpException('User canceling friend request not found', 404);
       });
 
-    const userToCancel = await this.userModel
+    const fRToCancel = await this.userModel
       .findById(idUserToCancel, {
         _id: true,
         friends: true,
@@ -390,16 +418,21 @@ export class FriendsService {
         throw new HttpException('User to cancel friend request not found', 404);
       });
 
+    // if the id has the same characters as the normal id per does not exist
+    if (!userCanceling || !fRToCancel) {
+      throw new HttpException('Users not found', 400);
+    }
+
     const {
       friends: friendsUserCanceling,
       pendingFriendRequests: pFRUserCaceling,
     } = userCanceling;
     const { friends: friendsUserToCanceled, friendsRequests: fRUserToCancel } =
-      userToCancel;
+      fRToCancel;
 
     // If you haven't sent any friend requests
     const iSendFR =
-      pFRUserCaceling.includes(userToCancel?._id) &&
+      pFRUserCaceling.includes(fRToCancel?._id) &&
       fRUserToCancel.includes(userCanceling?._id);
 
     if (!iSendFR) {
@@ -411,7 +444,7 @@ export class FriendsService {
 
     // If They are friends
     const isAlreadyFriends =
-      friendsUserCanceling.includes(userToCancel?._id) &&
+      friendsUserCanceling.includes(fRToCancel?._id) &&
       friendsUserToCanceled.includes(userCanceling?._id);
 
     if (isAlreadyFriends) {
@@ -423,16 +456,16 @@ export class FriendsService {
 
     await userCanceling?.updateOne({
       $pull: {
-        pendingFriendRequests: userToCancel?._id,
+        pendingFriendRequests: fRToCancel?._id,
       },
     });
 
-    await userToCancel?.updateOne({
+    await fRToCancel?.updateOne({
       $pull: {
         friendsRequests: userCanceling?._id,
       },
     });
 
-    return `You have canceled the friend request you sent to ${userToCancel?.nickName}`;
+    return `You have canceled the friend request you sent to ${fRToCancel?.nickName}`;
   }
 }

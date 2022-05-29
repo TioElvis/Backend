@@ -1,12 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import * as mongoose from 'mongoose';
+import { Users } from 'src/routes/users/schema/users.schema';
 
-export type PostDocument = Post & Document;
+export type PostDocument = Posts & mongoose.Document;
 
 @Schema()
-export class Post {
-  @Prop({ required: true, ref: 'users' })
-  userId: Types.ObjectId;
+export class Posts {
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'Users',
+    default: '',
+  })
+  userId: Users;
 
   @Prop({ type: Object, default: {} })
   image?: {
@@ -16,12 +22,6 @@ export class Post {
 
   @Prop({ trim: true, default: '' })
   description?: string;
-
-  @Prop({ ref: 'comments', default: [] })
-  comment: Types.ObjectId[];
-
-  @Prop({ default: [] })
-  likes: Types.ObjectId[];
 }
 
-export const PostSchema = SchemaFactory.createForClass(Post);
+export const PostSchema = SchemaFactory.createForClass(Posts);

@@ -4,17 +4,18 @@ import { CreatePDto } from './dto/createP.dto';
 import { Model } from 'mongoose';
 import { remove } from 'fs-extra';
 import { DeletePDto } from './dto/deleteP.dto';
-import { Post, PostDocument } from 'src/routes/posts/schema/posts.schema';
-import { User, UserDocument } from 'src/routes/users/schema/users.schema';
+import { Posts, PostDocument } from 'src/routes/posts/schema/posts.schema';
+import { Users, UserDocument } from 'src/routes/users/schema/users.schema';
 import { deleteImage, uploadImage } from 'src/libs/cloudinary';
 
 @Injectable()
 export class PostsService {
   constructor(
-    @InjectModel(Post.name) private postModel: Model<PostDocument>,
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Posts.name) private postModel: Model<PostDocument>,
+    @InjectModel(Users.name) private userModel: Model<UserDocument>,
   ) {}
 
+  // Route create post
   // Route create post
   async createP(
     createPostDto: CreatePDto,
@@ -29,7 +30,9 @@ export class PostsService {
       .findById(id, {
         _id: true,
         nickName: true,
+        friends: true,
       })
+      .populate('friends', { _id: 1 })
       .catch(() => {
         throw new HttpException(
           'User who wants to create a post has not been found',
@@ -62,6 +65,22 @@ export class PostsService {
     const newPost = await this.postModel.create(payload);
 
     const postId = newPost?._id;
+
+    const { friends } = userCreatingPost;
+
+    if (friends) {
+      for (const friendId of friends) {
+        const postsFreinds = await this.userModel.findById(friendId, {
+          postsFriends: true,
+        });
+
+        await postsFreinds?.updateOne({
+          $push: {
+            postsFriends: newPost?._id,
+          },
+        });
+      }
+    }
 
     // Updating
     await userCreatingPost?.updateOne({
@@ -97,9 +116,9 @@ export class PostsService {
         throw new HttpException('post to delete not found', 404);
       });
 
-    // if there is no user deleted a post
-    if (!userDeleting) {
-      throw new HttpException('User not found, thats why this error', 404);
+    // if not found user's posts
+    if (!userDeleting || !postToDelete) {
+      throw new HttpException('User or publication not found', 400);
     }
 
     // if not my post
@@ -114,21 +133,20 @@ export class PostsService {
       );
     }
 
-    // if there is an image
     const { image } = postToDelete;
 
     if (image) {
-      await deleteImage(image.public_id);
+      await deleteImage(image?.public_id);
     }
 
     // Updating
-    await postToDelete.delete();
-
     await userDeleting?.updateOne({
       $pull: {
         posts: postToDelete?._id,
       },
     });
+
+    await postToDelete.delete();
 
     return `${userDeleting.nickName} you have successfully deleted a post`;
   }

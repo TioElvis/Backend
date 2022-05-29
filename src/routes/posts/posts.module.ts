@@ -2,18 +2,18 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Module } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
-import { Post, PostSchema } from 'src/routes/posts/schema/posts.schema';
-import { User, UserSchema } from 'src/routes/users/schema/users.schema';
+import { Posts, PostSchema } from 'src/routes/posts/schema/posts.schema';
+import { Users, UserSchema } from 'src/routes/users/schema/users.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       {
-        name: Post.name,
+        name: Posts.name,
         schema: PostSchema,
       },
       {
-        name: User.name,
+        name: Users.name,
         schema: UserSchema,
       },
     ]),
