@@ -5,12 +5,12 @@ import { RegisterDto } from './dto/register.dto';
 import { hash, compare } from 'bcrypt';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
-import { Users, UserDocument } from 'src/routes/users/schema/users.schema';
+import { UserDocument, User } from 'src/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(Users.name) private userModel: Model<UserDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
     private jwtAuthService: JwtService,
   ) {}
 

@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { PostsService } from './posts.service';
+import { PostsService } from './post.service';
 import { CreatePDto } from './dto/createP.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -15,7 +15,7 @@ import { DeletePDto } from './dto/deleteP.dto';
 import { storage } from 'src/libs/multer';
 
 @ApiTags('posts')
-@Controller('posts')
+@Controller('post')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
