@@ -50,11 +50,20 @@ export class PostsService {
       await remove(file.path);
     }
 
+    const date = new Date();
+    const dateNow =
+      String(date.getDate()) +
+      String(date.getMonth()) +
+      String(date.getHours()) +
+      String(date.getMinutes()) +
+      String(date.getSeconds());
+
     // Creating the post
     const payload = {
       userId: id,
       description: description,
       image: image,
+      date: dateNow,
     };
 
     const newPost = await this.postModel.create(payload);

@@ -20,35 +20,35 @@ export class User {
   @Prop({ required: true })
   password: string;
 
-  @Prop({ type: Object })
+  @Prop({ type: Object, default: {} })
   avatar?: Avatar;
 
   @Prop({
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: Post.name }],
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Post' }],
     default: [],
   })
   posts: Post[];
 
   @Prop({
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: Post.name }],
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Post' }],
     default: [],
   })
   postsThatILike: Post[];
 
   @Prop({
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: User.name }],
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }],
     default: [],
   })
   friends: User[];
 
   @Prop({
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: User.name }],
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }],
     default: [],
   })
   pendingFriendRequests: User[];
 
   @Prop({
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: User.name }],
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }],
     default: [],
   })
   friendRequests: User[];

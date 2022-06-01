@@ -24,15 +24,11 @@ export class UsersService {
         _id: false,
         friends: true,
       })
-      .populate({
-        path: 'friends',
-        select: { _id: true, posts: true },
-        populate: { path: 'posts' },
-      })
       .catch(() => {
         throw new HttpException('User not found', 404);
       });
 
+    // If the id has the same characters as the normal id but does not exist
     if (!user) {
       throw new HttpException('User not found', 404);
     }
@@ -49,10 +45,21 @@ export class UsersService {
 
     // If there are friends
     if (friends) {
-      for (const post of friends) {
-        postFuntion(post.posts);
+      for (const idF of friends) {
+        const posts = await this.postModel
+          .find({ userId: idF })
+          .populate('userId', {
+            _id: 0,
+            nickName: 1,
+          });
+        postFuntion(posts);
       }
     }
+
+    // Doing sort to put the most recent posts first
+    postsF.sort((post1: Post, post2: Post) => {
+      return -post1.date + +post2.date;
+    });
 
     return postsF;
   }

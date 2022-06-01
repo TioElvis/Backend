@@ -12,8 +12,7 @@ type Image = {
 @Schema()
 export class Post {
   @Prop({
-    type: MongooseSchema.Types.ObjectId,
-    ref: 'users',
+    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }],
   })
   userId: User;
 
@@ -22,6 +21,9 @@ export class Post {
 
   @Prop({ trim: true, default: '' })
   description?: string;
+
+  @Prop({})
+  date: string;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

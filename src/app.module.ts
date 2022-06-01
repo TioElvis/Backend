@@ -7,6 +7,7 @@ import { AuthModule } from './routes/auth/auth.module';
 import { UsersModule } from './routes/user/user.module';
 import { FriendsModule } from './routes/friend/friend.module';
 import { PostsModule } from './routes/post/post.module';
+import { GroupModule } from './routes/group/group.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { PostsModule } from './routes/post/post.module';
     FriendsModule,
     PostsModule,
     UsersModule,
+    GroupModule,
   ],
   controllers: [AppController],
   providers: [AppService],
