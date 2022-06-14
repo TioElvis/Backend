@@ -25,13 +25,19 @@ export class AuthService {
 
   async login(userObject: LoginDto) {
     const { email, password } = userObject;
-    const user = await this.userModel.findOne({ email: email });
+    const user = await this.userModel.findOne(
+      { email: email },
+      {
+        _id: true,
+        password: true,
+      },
+    );
 
     if (!user) {
       throw new HttpException('User not found', 404);
     }
 
-    const passwordToCompare = user.password;
+    const passwordToCompare = user?.password;
 
     const checkPassword = await compare(password, passwordToCompare);
 
@@ -39,11 +45,13 @@ export class AuthService {
       throw new HttpException('Password is invalid', 401);
     }
 
-    const payload = { id: user._id };
+    const id = user?._id;
+
+    const payload = { id: id };
     const token = this.jwtAuthService.sign(payload);
 
     const data = {
-      user,
+      id,
       token,
     };
 

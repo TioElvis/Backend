@@ -1,4 +1,4 @@
-import { Controller, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Body, Param, Patch, Get } from '@nestjs/common';
 import { FriendsService } from './friend.service';
 import { SendFRDto } from './dto/sendFR.dto';
 import { AcceptFRDto } from './dto/acceptFR.dto';
@@ -35,5 +35,10 @@ export class FriendsController {
   @Patch('/delete/:id')
   deleteF(@Param('id') id: string, @Body() deleteFriendDto: DeleteFDto) {
     return this.friendsService.deleteF(id, deleteFriendDto);
+  }
+
+  @Get('/:id')
+  friends(@Param('id') id: string) {
+    return this.friendsService.friends(id);
   }
 }

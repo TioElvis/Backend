@@ -6,6 +6,7 @@ import {
   UploadedFile,
   Param,
   Delete,
+  Get,
 } from '@nestjs/common';
 import { PostsService } from './post.service';
 import { CreatePDto } from './dto/createP.dto';
@@ -36,5 +37,10 @@ export class PostsController {
   @Delete('/delete/:id')
   findAllPosts(@Param('id') id: string, @Body() deletePDto: DeletePDto) {
     return this.postsService.deleteP(id, deletePDto);
+  }
+
+  @Get('/:id')
+  findById(@Param('id') id: string) {
+    return this.postsService.findById(id);
   }
 }

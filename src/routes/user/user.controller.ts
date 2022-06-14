@@ -12,8 +12,8 @@ export class UsersController {
     return this.usersService.findUser(id);
   }
 
-  @Get('/friends/posts/:id')
+  @Get('newPosts/:id')
   frindsP(@Param('id') id: string) {
-    return this.usersService.friendsP(id);
+    return this.usersService.friendsPost(id);
   }
 }

@@ -50,32 +50,15 @@ export class PostsService {
       await remove(file.path);
     }
 
-    const date = new Date();
-    const dateNow =
-      String(date.getDate()) +
-      String(date.getMonth()) +
-      String(date.getHours()) +
-      String(date.getMinutes()) +
-      String(date.getSeconds());
-
     // Creating the post
     const payload = {
       userId: id,
       description: description,
       image: image,
-      date: dateNow,
     };
 
-    const newPost = await this.postModel.create(payload);
-
-    const postId = newPost?._id;
-
-    // Updating
-    await userCreatingPost?.updateOne({
-      $push: {
-        posts: postId,
-      },
-    });
+    // Creating
+    await this.postModel.create(payload);
 
     return `${userCreatingPost?.nickName} you have created a post successfully`;
   }
@@ -83,5 +66,19 @@ export class PostsService {
   // Route Delete Post
   async deleteP(id: string, deletePDto: DeletePDto) {
     return 'a';
+  }
+
+  // Route Get By Id
+
+  async findById(id: string) {
+    const post = await this.postModel
+      .findById(id)
+      .populate('userId', {
+        nickName: 1,
+      })
+      .catch(() => {
+        throw new HttpException('Post not found', 404);
+      });
+    return post;
   }
 }

@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import mongoose from 'mongoose';
 import { Post } from './post.schema';
 
-export type UserDocument = User & Document;
+export type UserDocument = User & mongoose.Document;
 
 type Avatar = {
   url: string;
@@ -11,6 +11,9 @@ type Avatar = {
 
 @Schema()
 export class User {
+  @Prop({ required: true })
+  name: string;
+
   @Prop({ required: true, unique: true })
   nickName: string;
 
@@ -24,31 +27,25 @@ export class User {
   avatar?: Avatar;
 
   @Prop({
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Post' }],
-    default: [],
-  })
-  posts: Post[];
-
-  @Prop({
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Post' }],
+    type: [{ type: mongoose.Types.ObjectId, ref: 'Post' }],
     default: [],
   })
   postsThatILike: Post[];
 
   @Prop({
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }],
+    type: [{ type: mongoose.Types.ObjectId, ref: 'User' }],
     default: [],
   })
   friends: User[];
 
   @Prop({
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }],
+    type: [{ type: mongoose.Types.ObjectId, ref: 'User' }],
     default: [],
   })
   pendingFriendRequests: User[];
 
   @Prop({
-    type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }],
+    type: [{ type: mongoose.Types.ObjectId, ref: 'User' }],
     default: [],
   })
   friendRequests: User[];

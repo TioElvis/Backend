@@ -1,6 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Post, PostDocument } from 'src/schemas/post.schema';
 import { UserDocument, User } from 'src/schemas/user.schema';
 import { AcceptFRDto } from './dto/acceptFR.dto';
 import { CancelFRDto } from './dto/cancelFR.dto';
@@ -10,7 +11,10 @@ import { SendFRDto } from './dto/sendFR.dto';
 
 @Injectable()
 export class FriendsService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(Post.name) private postModel: Model<PostDocument>,
+  ) {}
 
   // Route send friend request
   async sendFR(id: string, sendFRDto: SendFRDto) {
@@ -403,5 +407,10 @@ export class FriendsService {
     });
 
     return `You have removed ${userToDelete?.nickName} from your friends list`;
+  }
+
+  // Route get friends
+  async friends(id: string) {
+    return '';
   }
 }
