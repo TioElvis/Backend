@@ -1,24 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document } from 'mongoose';
+import mongoose from 'mongoose';
 import { User } from './user.schema';
 
-export type CommentDocument = Comment & Document;
+export type CommentDocument = Comment & mongoose.Document;
 
-const dateNow = new Date();
-
-@Schema()
+@Schema({ timestamps: true })
 export class Comment {
-  @Prop({
-    type: mongoose.Types.ObjectId,
-    ref: 'User',
-  })
-  userId: User;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  userId: mongoose.Schema.Types.ObjectId | User;
 
-  @Prop({ trim: true, default: '' })
-  description?: string;
-
-  @Prop({ type: Date, default: dateNow })
-  date: Date;
+  @Prop({ type: String, default: '', trim: true, required: true })
+  description: string;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);

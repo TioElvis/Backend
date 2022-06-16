@@ -14,17 +14,34 @@ export class AuthService {
     private jwtAuthService: JwtService,
   ) {}
 
-  async register(userObject: RegisterDto) {
-    const { password } = userObject;
+  async register(registerDto: RegisterDto) {
+    const { password, nickname, email } = registerDto;
     const hashPassword = await hash(password, 12);
 
-    userObject = { ...userObject, password: hashPassword };
+    const findByNickname = await this.userModel.findOne({ nickname: nickname });
+    const findByEmail = await this.userModel.findOne({ email: email });
 
-    return this.userModel.create(userObject);
+    if (findByNickname) {
+      throw new HttpException(
+        'There is already a user with this nickname, try another',
+        401,
+      );
+    }
+
+    if (findByEmail) {
+      throw new HttpException(
+        'There is already a user with this email, try another',
+        401,
+      );
+    }
+
+    registerDto = { ...registerDto, password: hashPassword };
+
+    return this.userModel.create(registerDto);
   }
 
-  async login(userObject: LoginDto) {
-    const { email, password } = userObject;
+  async login(loginDto: LoginDto) {
+    const { email, password } = loginDto;
     const user = await this.userModel.findOne(
       { email: email },
       {

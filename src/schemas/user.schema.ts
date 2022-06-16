@@ -1,54 +1,50 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
-import { Post } from './post.schema';
 
 export type UserDocument = User & mongoose.Document;
 
-type Avatar = {
+export type Avatar = {
   url: string;
   public_id: string;
 };
 
 @Schema()
 export class User {
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   name: string;
 
-  @Prop({ required: true, unique: true })
-  nickName: string;
+  @Prop({ type: String, required: true, unique: true })
+  nickname: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ type: String, required: true, unique: true })
   email: string;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   password: string;
 
   @Prop({ type: Object, default: {} })
-  avatar?: Avatar;
+  avatar: Avatar;
 
   @Prop({
-    type: [{ type: mongoose.Types.ObjectId, ref: 'Post' }],
+    type: [{ type: mongoose.Schema.Types.ObjectId }],
+    ref: 'User',
     default: [],
   })
-  postsThatILike: Post[];
+  friends: Array<mongoose.Schema.Types.ObjectId | User>;
 
   @Prop({
-    type: [{ type: mongoose.Types.ObjectId, ref: 'User' }],
+    type: [{ type: mongoose.Schema.Types.ObjectId }],
+    ref: 'User',
     default: [],
   })
-  friends: User[];
+  pendingFriendRequests: Array<mongoose.Schema.Types.ObjectId | User>;
 
   @Prop({
-    type: [{ type: mongoose.Types.ObjectId, ref: 'User' }],
+    type: [{ type: mongoose.Schema.Types.ObjectId }],
+    ref: 'User',
     default: [],
   })
-  pendingFriendRequests: User[];
-
-  @Prop({
-    type: [{ type: mongoose.Types.ObjectId, ref: 'User' }],
-    default: [],
-  })
-  friendRequests: User[];
+  friendRequests: Array<mongoose.Schema.Types.ObjectId | User>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

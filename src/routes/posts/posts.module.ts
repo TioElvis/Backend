@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
-import { FriendsService } from './friend.service';
-import { FriendsController } from './friend.controller';
 import { MongooseModule } from '@nestjs/mongoose';
+import { Module } from '@nestjs/common';
 import { User, UserSchema } from 'src/schemas/user.schema';
 import { Post, PostSchema } from 'src/schemas/post.schema';
+import { PostsController } from './posts.controller';
+import { CreatePostService } from './services/createPost.service';
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ import { Post, PostSchema } from 'src/schemas/post.schema';
       },
     ]),
   ],
-  controllers: [FriendsController],
-  providers: [FriendsService],
+  controllers: [PostsController],
+  providers: [CreatePostService],
 })
-export class FriendsModule {}
+export class PostModule {}

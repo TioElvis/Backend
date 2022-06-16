@@ -4,5 +4,7 @@ import { LoginDto } from './login.dto';
 
 export class RegisterDto extends PartialType(LoginDto) {
   @IsNotEmpty()
-  nickName: string;
+  name: string;
+  @IsNotEmpty()
+  nickname: string;
 }

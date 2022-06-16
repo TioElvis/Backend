@@ -1,9 +1,10 @@
 import { MongooseModule } from '@nestjs/mongoose';
 import { Module } from '@nestjs/common';
-import { UsersService } from './user.service';
-import { UsersController } from './user.controller';
 import { User, UserSchema } from 'src/schemas/user.schema';
 import { Post, PostSchema } from 'src/schemas/post.schema';
+import { UsersController } from './user.controller';
+import { NewPostsService } from './services/get/newPosts.service';
+import { UpdateAvatarService } from './services/patch/updateAvatar.service';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { Post, PostSchema } from 'src/schemas/post.schema';
     ]),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [NewPostsService, UpdateAvatarService],
 })
 export class UsersModule {}
