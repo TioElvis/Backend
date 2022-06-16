@@ -8,7 +8,9 @@ import { PostModule } from './routes/posts/posts.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     MongooseModule.forRoot(process.env.MONGO_CONNECTION),
     AuthModule,
     FriendsModule,
