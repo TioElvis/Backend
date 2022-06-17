@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
+import { Post } from './post.schema';
 
 export type UserDocument = User & mongoose.Document;
 
@@ -45,6 +46,13 @@ export class User {
     default: [],
   })
   friendRequests: Array<mongoose.Schema.Types.ObjectId | User>;
+
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId }],
+    ref: 'Post',
+    default: [],
+  })
+  postsThatIlike: Array<mongoose.Schema.Types.ObjectId | Post>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

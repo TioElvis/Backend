@@ -4,6 +4,9 @@ import { User, UserSchema } from 'src/schemas/user.schema';
 import { Post, PostSchema } from 'src/schemas/post.schema';
 import { PostsController } from './posts.controller';
 import { CreatePostService } from './services/createPost.service';
+import { GetPostByIdService } from './services/getPostById.service';
+import { LikeThatPostService } from './services/likeThatPost.service';
+import { DisLikeThatPostService } from './services/dislikeThatPost.service';
 
 @Module({
   imports: [
@@ -19,6 +22,11 @@ import { CreatePostService } from './services/createPost.service';
     ]),
   ],
   controllers: [PostsController],
-  providers: [CreatePostService],
+  providers: [
+    CreatePostService,
+    GetPostByIdService,
+    LikeThatPostService,
+    DisLikeThatPostService,
+  ],
 })
 export class PostModule {}

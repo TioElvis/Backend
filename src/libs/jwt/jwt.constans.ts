@@ -1,3 +1,3 @@
 export const jstConstanst = {
-  secret: process.env.JSONWEBTOKEN_SECRET,
+  secret: 'process.env.JSONWEBTOKEN_SECRET',
 };

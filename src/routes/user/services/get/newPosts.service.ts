@@ -24,7 +24,7 @@ export class NewPostsService {
     const posts = await this.postModel
       .find({ userId: usersIds })
       .populate('userId', {
-        nickName: 1,
+        nickname: 1,
         avatar: 1,
       })
       .sort({ createdAt: 'descending' });
