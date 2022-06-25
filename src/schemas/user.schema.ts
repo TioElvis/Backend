@@ -52,7 +52,7 @@ export class User {
     ref: 'Post',
     default: [],
   })
-  postsThatIlike: Array<mongoose.Schema.Types.ObjectId | Post>;
+  postsLikes: Array<mongoose.Schema.Types.ObjectId | Post>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -33,14 +33,11 @@ export class Post {
   @Prop({ type: Boolean, default: true })
   isLikes: boolean;
 
-  @Prop({ type: Number, default: 0 })
-  likes: number;
-
   @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     default: [],
   })
-  peopleWhoLikeThisPost: Array<mongoose.Schema.Types.ObjectId | User>;
+  likes: Array<mongoose.Schema.Types.ObjectId | User>;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);
