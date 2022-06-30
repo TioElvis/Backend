@@ -52,9 +52,11 @@ export class CreateService {
         image: image,
       };
 
-      await this.postSchema.create(payload);
+      const post = await this.postSchema.create(payload);
 
-      return 'You have created a post successfully';
+      const postId = await post._id;
+
+      return postId;
     } catch (err) {
       throw new HttpException(err, 400);
     }
