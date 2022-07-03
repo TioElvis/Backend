@@ -1,8 +1,8 @@
 import { Controller, Get, Param, Patch } from '@nestjs/common';
-import { GiveDislikeService } from '../../services/like-post/give-dislike-post';
-import { GiveLikeService } from '../../services/like-post/give-like-post';
-import { ILikeThatService } from '../../services/like-post/i-like-that-post';
-import { GetPeopleWhoLikeThisService } from '../../services/like-post/people-who-like-this-post';
+import { GiveDislikeService } from '../../services/like/give-dislike';
+import { GiveLikeService } from '../../services/like/give-like';
+import { ILikeThatService } from '../../services/like/i-like-that';
+import { GetPeopleWhoLikeThisService } from '../../services/like/people-who-like-this';
 
 @Controller('like-post')
 export class LikeController {
