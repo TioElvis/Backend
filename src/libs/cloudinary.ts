@@ -5,7 +5,7 @@ dotenv.config();
 v2.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.API_KEY,
-  api_secret: '3zL92lG54fTgwer-0wtgy8XfS1M',
+  api_secret: process.env.API_SECRET_1 + '-' + process.env.API_SECRET_2,
 });
 
 export const uploadImage = async (filePath: string) => {
